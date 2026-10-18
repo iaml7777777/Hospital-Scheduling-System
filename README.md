@@ -1,59 +1,74 @@
-# HospitalSchedulingSystem
+# 護理人員智慧排班系統 (Hospital Nurse Scheduling System) - Angular 22
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.4.
+本系統依據《護理人員排班系統 SA／SD 文件-V2.0》與衛生福利部《勞動基準法下護理排班問答暨合理護理排班指引與範例》完整規格實作，基於 **Angular 22** 獨立元件 (Standalone Components)、Signals 響應式狀態管理與 Less 醫療級視覺設計。
 
-## Development server
+---
 
-To start a local development server, run:
+## 🌟 系統亮點與功能對照
 
+### 1. 角色與權限架構 (FR-01 ~ FR-04, §3, §7.1)
+- **系統管理員 (`admin`)**：具全院所有單位管轄權、系統參數/加權扣分設定、帳號密碼解鎖與重設、國定假日清冊維護、法定限制值鎖定。
+- **護理長 (`user1` ~ `user9`)**：管轄所屬病房單位（如 7A 一般內科病房），執行自動排班、點選格子微調、釘選、重新檢核、公布班表、退回草稿、月底結案、休假與換班三方審核。
+- **護理人員 (`nurse1` ~ `nurse9`)**：查看「我的班表」（月曆檢視，僅在公布後可見）、當月工時休假統計、每個工作日點擊「找人換班」、線上請假與預班申請。
+
+### 2. 核心模組與畫面 (UI-01 ~ UI-11a)
+| 模組代號 | 畫面名稱 | 說明 |
+| :--- | :--- | :--- |
+| **UI-01 / 02** | 系統登入與改密碼 | 支援帳號密碼登入、錯誤5次鎖定防護、首次登入強制改密碼、快速體驗帳號點選 |
+| **UI-03** | 總覽儀表板 | 各病房床位數、在職人數、當月班表狀態、待審休假與換班數、勞基法合規重點 |
+| **UI-04 / 04a** | 班表管理與格子微調 | 月份整月矩陣、四大關鍵指標、點格切換班別/假別、釘選保留、天災緊急出勤原因（§40） |
+| **UI-05** | 休假與預班申請 | 線上提出休假(L)、預休(P)、指定班別(S)；同人同日防重送；護理長線上核准/駁回 |
+| **UI-06** | 換班三方審核 | 申請人提出 ➔ 對方同仁同意 ➔ 護理長法規驗算後核准；核准當下事務性對調班表 |
+| **UI-07** | 統計與公平度圖表 | 各班出勤統計、夜班分配長條圖（標示平均線）、假日班長條圖、四週彈性工時週期表（FR-42） |
+| **UI-08 / 08a** | 護理人員與偏好 | 員工基本資料、母性健康保護期間（妊娠/哺乳夜間禁止）、本人同意換班超過一次、個人排班偏好 |
+| **UI-09 ~ 09c** | 單位與班別維護 | 工時制度（四週彈性）、上下班時間工時自動推算（跨日+24h）、日型態與逐日需求、人力充足率驗算（FR-13） |
+| **UI-10** | 系統設定 (管理員) | 帳號權限管理、國定假日與補班日、最少休息時數鎖定 ≥11h（FR-39）、最佳化權重、亂數種子 |
+| **UI-11 / 11a** | 我的班表 | 護理人員月曆檢視、當月出勤統計、工作日「找人換班」即時彈窗 |
+
+### 3. 排班引擎 (M06) 與 規則檢查器 (M07)
+- **可重現性 (NFR-03)**：內建固定亂數種子 PRNG，相同輸入保證產生 100% 相同班表結果。
+- **一例二休三國假排班流程 (BR-G7)**：先排入法定例休假並錯開同仁放假日（BR-G5），再依照人力需求指派排班。
+- **勞動基準法最高優先限制**：
+  - **BR-L1 / BR-L5**：班次更換連續休息時間不得低於 11 小時（杜絕夜接白）、單日正常工時限制。
+  - **BR-L7 / BR-L8**：妊娠、哺乳期間（產後一年內）女性嚴格禁止排入 22:00～06:00 夜間工作。
+  - **BR-L3 / §36**：四週彈性工時每 2 週至少 2 例假、4 週內例假與休息日至少合計 8 日，連續上班天數 ≤ 6 天。
+- **公布前強制檢核 (FR-24)**：必須修正（硬規則/法規違規）件數必須為 0，公布按鈕才可點擊。
+
+---
+
+## 🚀 啟動與運行方式
+
+請在專案目錄 `D:\hospital\hospital-scheduling-system` 執行下列指令：
+
+### 1. 啟動開發伺服器
 ```bash
+npm start
+# 或
 ng serve
 ```
+啟動後於瀏覽器開啟：`http://localhost:4200/`
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+### 2. 建置生產環境版本
 ```bash
-ng generate component component-name
+npm run build
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
+### 3. 執行單元測試
 ```bash
-ng generate --help
+npm test
 ```
 
-## Building
+---
 
-To build the project run:
+## 🔑 預設體驗帳號清單
 
-```bash
-ng build
-```
+| 帳號 (Username) | 預設密碼 | 角色 | 說明 |
+| :--- | :--- | :--- | :--- |
+| `admin` | `admin123` | 系統管理員 (A) | 全院全功能權限、系統參數與帳號維護 |
+| `user1` | `user123` | 護理長 (H) | 7A 一般內科病房護理長（排班、審核、人員管理） |
+| `user2` | `user123` | 護理長 (H) | 加護病房 (ICU) 護理長 |
+| `nurse1` | `nurse123` | 護理人員 (N) | 張佩芬（N3 資深帶班護理師） |
+| `nurse2` | `nurse123` | 護理人員 (N) | 王美玲（N3 資深護理師） |
+| `nurse5` | `nurse123` | 護理人員 (N) | 郭欣儒（N1 護理師，登記妊娠保護期間） |
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+> **提示**：系統登入頁與左側功能列下方均提供「快速切換體驗帳號」下拉選單，可無縫切換不同角色進行功能驗證！

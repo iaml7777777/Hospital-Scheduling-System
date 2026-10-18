@@ -1,12 +1,33 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs';
+import { AuthService } from './services/auth.service';
+import { SidebarComponent } from './components/layout/sidebar/sidebar.component';
+import { HeaderComponent } from './components/layout/header/header.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [CommonModule, RouterOutlet, SidebarComponent, HeaderComponent],
   templateUrl: './app.html',
-  styleUrl: './app.less'
+  styleUrl: './app.less',
+  host: {
+    ngSkipHydration: 'true',
+  },
 })
 export class App {
-  protected readonly title = signal('hospital-scheduling-system');
+  auth = inject(AuthService);
+  private router = inject(Router);
+
+  readonly isLoginPage = signal<boolean>(false);
+
+  constructor() {
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        const url = event.urlAfterRedirects || event.url;
+        this.isLoginPage.set(url.includes('/login'));
+      });
+  }
 }
